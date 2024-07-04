@@ -1,0 +1,11 @@
+{
+	"id": "snippets-suggestion",
+	"name": "Snippets Suggestion",
+	"version": "1.0.3",
+	"minAppVersion": "1.0.1",
+	"description": "auto suggestion for custom snippets",
+	"author": " wis ",
+	"authorUrl": "https://github.com/project-writers/obsidian-snippet-suggestion",
+	"fundingUrl": "https://x.com/wistaria_por",
+	"isDesktopOnly": false
+}

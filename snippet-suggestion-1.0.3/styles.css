@@ -1,0 +1,132 @@
+/*a[href="https://ko-fi.com/phibr0"] > img*/
+/*{*/
+/*  height: 3em;*/
+/*}*/
+/**/
+/*a[href="https://ko-fi.com/phibr0"]*/
+/*{*/
+/*  transform: translate(0, 5%);*/
+/*}*/
+
+/*최상단 심볼 설명*/
+.SS-symbol-description {
+	color: gray;
+}
+
+.custom-snippet {
+	width: 100%;
+	display: flex;
+}
+/* 설명 왼쪽 */
+.custom-snippet-info {
+	display: flex;
+    justify-content: start;
+    width: 100%; 
+	gap: 10px;
+}
+/* 설명 오른쪽 */
+.custom-snippet-content {
+	display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.custom-snippet-trash {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+	margin-right: 5px;
+	margin-left: 5px;
+}
+
+.custom-snippet-command {
+	width: 100%;
+}
+.custom-snippet-code, .custom-snippet-command-input {
+	width: 100%;
+	text-align: left;
+	-webkit-app-region: no-drag;
+    background: var(--background-modifier-form-field);
+    border: var(--input-border-width) solid var(--background-modifier-border);
+    color: var(--text-normal);
+    font-family: inherit;
+    padding: var(--size-4-2) var(--size-4-2);
+    font-size: var(--font-ui-small);
+    border-radius: var(--input-radius);
+    outline: 3px solid transparent;
+	transition: all 0.15s ease-in-out;
+	overflow-y: hidden; 
+	height: calc(var(--size-4-4) * 2);
+}
+
+.custom-snippet-code:focus {
+	outline: 3px solid var(--background-modifier-border-focus);
+	height: auto;
+}
+.custom-snippet-code:hover {
+	height: auto;
+}
+
+/* suggestion render */
+.SS-suggester-container {
+  display: flex;
+  place-content: space-between;
+  width: 400px;
+}
+.highlight {
+	color:red;
+	font-weight: bold;
+}
+.SS-shortcode {
+	width: 30%;
+}
+.SS-desc {
+	width: 40%;
+	font-weight: bold;
+	color: #C9B8FF;
+	overflow-wrap: break-word;
+	margin-right:10px;
+}
+.SS-code {    
+	width: 100%;
+	text-align: left;
+	-webkit-app-region: no-drag;
+    background: var(--background-modifier-form-field);
+    border: var(--input-border-width) solid var(--background-modifier-border);
+    color: var(--text-normal);
+    font-family: inherit;
+    padding: var(--size-4-1) var(--size-4-2);
+    font-size: var(--font-ui-small);
+    border-radius: var(--input-radius);
+}
+.SS-command {
+	background: linear-gradient(
+		to bottom right,
+		var(--background-modifier-form-field),
+		rgba(0, 141, 205, 0.1) 20%
+	);
+	/*color: #00AFEF;*/
+}
+.SS-cursor {
+	color: red;
+}
+.SS-clip {
+	color: #008B8B;
+}
+/* 다크 모드 설정 */
+:root {
+    --dark-mode-text-color: #E6E6FA; /* 다크 모드 텍스트 색상 */
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-dark .SS-desc {
+        color: var(--dark-mode-text-color);
+    }
+}
+
+
+/* 히스토리 서브셋팅*/
+.SS-sub-setting {
+  padding-left: 2em;
+}
+.SS-sub-setting + .SS-sub-setting {
+  padding-left: 0;
+  margin-left: 2em;
+}
