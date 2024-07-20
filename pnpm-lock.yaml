@@ -11,6 +11,9 @@ importers:
       fuse.js:
         specifier: ^7.0.0
         version: 7.0.0
+      hangul-js:
+        specifier: ^0.2.6
+        version: 0.2.6
     devDependencies:
       '@tsconfig/svelte':
         specifier: ^5.0.4
@@ -565,6 +568,9 @@ packages:
 
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
+
+  hangul-js@0.2.6:
+    resolution: {integrity: sha512-48axU8LgjCD30FEs66Xc04/8knxMwCMQw0f67l67rlttW7VXT3qRJgQeHmhiuGwWXGvSbk6YM0fhQlcjE1JFQA==}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -1372,6 +1378,8 @@ snapshots:
       slash: 3.0.0
 
   graphemer@1.4.0: {}
+
+  hangul-js@0.2.6: {}
 
   has-flag@4.0.0: {}
 

@@ -2,6 +2,7 @@ import { PluginSettingTab, Setting } from "obsidian";
 import SnippetsSuggestionPlugin from "./main";
 import { DEFAULT_SETTINGS } from "./data";
 import { getNow } from "./util";
+import { trash } from "./icons";
 export class SettingView extends PluginSettingTab {
 	constructor(public plugin: SnippetsSuggestionPlugin) {
 		super(plugin.app, plugin);
@@ -28,6 +29,7 @@ export class SettingView extends PluginSettingTab {
 		this.addCommandInfoSetting(container);
 		this.addCommandSettings(container);
 		this.addTriggerSetting(container);
+		this.addRenderCodeCliptextLineNumber(container);
 		this.addRenderCodeMaxLine(container);
 		this.addDateFormatSetting(container);
 		this.addTimeFormatSetting(container);
@@ -131,9 +133,8 @@ export class SettingView extends PluginSettingTab {
 			});
 
 			// Delete
-			const deleteButton = setting.controlEl.createEl("button", {
-				text: "x",
-			});
+			const deleteButton = setting.controlEl.createEl("button");
+			deleteButton.innerHTML = trash;
 			deleteButton.addClass("custom-snippet-trash");
 			deleteButton.addEventListener("click", () => {
 				s.snippets = s.snippets.filter((o2) => o2.name !== o.name);
@@ -221,9 +222,8 @@ export class SettingView extends PluginSettingTab {
 			});
 
 			// Delete
-			const deleteButton = setting.controlEl.createEl("button", {
-				text: "x",
-			});
+			const deleteButton = setting.controlEl.createEl("button");
+			deleteButton.innerHTML = trash;
 			deleteButton.addClass("custom-snippet-trash");
 			deleteButton.addEventListener("click", () => {
 				s.commands = s.commands.filter((o2) => o2.name !== o.name);
@@ -243,6 +243,22 @@ export class SettingView extends PluginSettingTab {
 		}
 	}
 
+	private addRenderCodeCliptextLineNumber(container: HTMLElement) {
+		new Setting(container)
+			.setName("클립보드 텍스트 줄 수 표기")
+			.setDesc(
+				"붙여넣기시 제안화면에 표시되는 클립보드 텍스트에 총 라인수를 표기합니다",
+			)
+			.addToggle((component) => {
+				component
+					.setValue(this.plugin.settings.hasCliptextLineNumber)
+					.onChange(async (value) => {
+						this.plugin.settings.hasCliptextLineNumber = value;
+						await this.plugin.saveSettings();
+						this.display();
+					});
+			});
+	}
 	private addRenderCodeMaxLine(container: HTMLElement) {
 		new Setting(container)
 			.setName("최대 줄 수")

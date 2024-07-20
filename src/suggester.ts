@@ -11,6 +11,7 @@ import SnippetsSuggestionPlugin from "./main";
 import { getNow } from "./util";
 import Fuse from "fuse.js";
 import { CommandValues, SnippetsValues } from "./data";
+import * as Hangul from "hangul-js";
 
 export class Suggester extends EditorSuggest<string> {
 	private currentContext: EditorSuggestContext | null = null;
@@ -49,6 +50,8 @@ export class Suggester extends EditorSuggest<string> {
 			.toLowerCase();
 		if (query.length === 0)
 			return this.plugin.snippetList.filter((p) => p.includes(query));
+		// 한글변환
+		query = this.hangul2roman(query);
 
 		// 퍼지파인딩
 		const options = {
@@ -70,11 +73,14 @@ export class Suggester extends EditorSuggest<string> {
 		const s = this.plugin.settings;
 		const symbols = this.plugin.settings.symbols;
 		const outer = el.createDiv({ cls: "SS-suggester-container" });
-		const query =
+		let query =
 			this.currentContext?.query
 				.replace(/`/g, "")
 				.replace(s.trigger, "")
 				.toLowerCase() ?? "";
+
+		// 한글 변환
+		query = this.hangul2roman(query);
 		const highlightedSuggestion = this.highlightQuery(suggestion, query);
 		outer.createDiv({ cls: "SS-shortcode" }).innerHTML =
 			highlightedSuggestion;
@@ -106,7 +112,9 @@ export class Suggester extends EditorSuggest<string> {
 					: cliptext;
 			code = code.replace(
 				symbols.pasteSymbol,
-				`<span class="SS-clip">${text}</span>`,
+				this.plugin.settings.hasCliptextLineNumber
+					? `<span class="SS-clip">${text}(${cliptext.split("\n").length})</span>`
+					: `<span class="SS-clip">${text}</span>`,
 			);
 
 			outer.createDiv({ cls: "SS-desc" }).setText(suggestObj.desc);
@@ -226,5 +234,72 @@ export class Suggester extends EditorSuggest<string> {
 		obj: SnippetsValues | CommandValues,
 	): obj is SnippetsValues {
 		return "code" in obj;
+	}
+
+	hangul2roman(str: string) {
+		const isKorean = (char: string): boolean => {
+			if (char.length === 0) return false;
+			const code = char[0].charCodeAt(0);
+			return (
+				(code >= 0xac00 && code <= 0xd7a3) || // 현대 한글 음절
+				(code >= 0x1100 && code <= 0x11ff) || // 옛 한글 자모 (초성, 중성, 종성)
+				(code >= 0x3130 && code <= 0x318f) || // 한글 호환 자모
+				(code >= 0xa960 && code <= 0xa97f) || // 한글 자모 확장-A
+				(code >= 0xd7b0 && code <= 0xd7ff) // 한글 자모 확장-B
+			);
+		};
+		if (!isKorean(str)) return str;
+
+		const KEYs: Record<string, string> = {
+			ㅃ: "Q",
+			ㅉ: "W",
+			ㄸ: "E",
+			ㄲ: "R",
+			ㅆ: "T",
+			ㅒ: "O",
+			ㅖ: "P",
+			ㅂ: "q",
+			ㅈ: "w",
+			ㄷ: "e",
+			ㄱ: "r",
+			ㅅ: "t",
+			ㅛ: "y",
+			ㅕ: "u",
+			ㅑ: "i",
+			ㅐ: "o",
+			ㅔ: "p",
+			ㅁ: "a",
+			ㄴ: "s",
+			ㅇ: "d",
+			ㄹ: "f",
+			ㅎ: "g",
+			ㅗ: "h",
+			ㅓ: "j",
+			ㅏ: "k",
+			ㅣ: "l",
+			ㅋ: "z",
+			ㅌ: "x",
+			ㅊ: "c",
+			ㅍ: "v",
+			ㅠ: "b",
+			ㅜ: "n",
+			ㅡ: "m",
+			ㄳ: "rt",
+			ㅄ: "qt",
+			ㄼ: "fq",
+			ㄺ: "fr",
+			ㄻ: "fa",
+			ㅀ: "fg",
+			ㄾ: "fx",
+			ㄿ: "fv",
+		};
+		const kor2eng = (key: string) => {
+			const korean = /[ㄱ-ㅎ|ㅏ-ㅣ]/;
+			if (korean.test(key)) return KEYs[key];
+			return key;
+		};
+		return Hangul.disassemble(str)
+			.map((c) => kor2eng(c))
+			.join("");
 	}
 }

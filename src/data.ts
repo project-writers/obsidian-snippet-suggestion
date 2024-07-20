@@ -11,6 +11,7 @@ export type SettingsData = {
 	dayFormat: string;
 	nowFormat: string;
 	hasHistory: boolean;
+	hasCliptextLineNumber: boolean;
 	lenthOfHistory: number;
 	trigger: string;
 	maxLines: number;
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: SettingsData = {
 	},
 	hasHistory: true,
 	lenthOfHistory: 10,
+	hasCliptextLineNumber: true,
 	history: [],
 	trigger: "/",
 	maxLines: 3,
