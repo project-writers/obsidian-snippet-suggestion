@@ -60,7 +60,16 @@ function addCommandSettings(
 			const index = s.history.indexOf(beforeName);
 			if (index >= 0) s.history[index] = afterName;
 			plugin.saveSettings();
+		});
+
+		shortcode.addEventListener("blur", () => {
 			display();
+		});
+
+		shortcode.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				display();
+			}
 		});
 
 		// Description
