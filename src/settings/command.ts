@@ -39,9 +39,9 @@ function addCommandSettings(
 ) {
 	const s = plugin.settings;
 	const c = app.commands.commands;
-	for (let i = s.commands.length - 1; i >= 0; i--) {
-		const o = s.commands[i];
+	s.commands.sort((a, b) => a.name.localeCompare(b.name));
 
+	for (const o of s.commands) {
 		const setting = new Setting(container).setClass("custom-snippet");
 		setting.infoEl.addClass("custom-snippet-info");
 		setting.controlEl.addClass("custom-snippet-content");
@@ -53,13 +53,14 @@ function addCommandSettings(
 		});
 		shortcode.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			const beforeName = s.commands[i].name;
+			const beforeName = o.name;
 			const afterName = target.value;
-			s.commands[i].name = afterName;
+			o.name = afterName;
 			// history 에서 이름 변경
 			const index = s.history.indexOf(beforeName);
 			if (index >= 0) s.history[index] = afterName;
 			plugin.saveSettings();
+			display();
 		});
 
 		// Description
@@ -69,7 +70,7 @@ function addCommandSettings(
 		});
 		description.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			s.commands[i].desc = target.value;
+			o.desc = target.value;
 			plugin.saveSettings();
 		});
 
@@ -99,7 +100,7 @@ function addCommandSettings(
 		// 입력 필드 변경 이벤트 처리
 		commandSearchInput.addEventListener("input", (e) => {
 			const selectedCommandName = (e.target as HTMLInputElement).value;
-			s.commands[i].commandId = selectedCommandName;
+			o.commandId = selectedCommandName;
 			plugin.saveSettings();
 		});
 
@@ -117,7 +118,7 @@ function addCommandSettings(
 		// Toggle
 		setting.addToggle((comp) => {
 			comp.setValue(o.check).onChange(async (value) => {
-				s.commands[i].check = value;
+				o.check = value;
 				await plugin.saveSettings();
 				display();
 			});

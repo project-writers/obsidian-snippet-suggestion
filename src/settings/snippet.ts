@@ -37,9 +37,9 @@ function addSnippetSettings(
 	display: () => void,
 ) {
 	const s = plugin.settings;
-	for (let i = s.snippets.length - 1; i >= 0; i--) {
-		const o = s.snippets[i];
+	s.snippets.sort((a, b) => a.name.localeCompare(b.name));
 
+	for (const o of s.snippets) {
 		const setting = new Setting(container).setClass("custom-snippet");
 		setting.infoEl.addClass("custom-snippet-info");
 		setting.controlEl.addClass("custom-snippet-content");
@@ -51,13 +51,14 @@ function addSnippetSettings(
 		});
 		shortcode.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			const beforeName = s.snippets[i].name;
+			const beforeName = o.name;
 			const afterName = target.value;
-			s.snippets[i].name = afterName;
+			o.name = afterName;
 			// history 에서 이름 변경
 			const index = s.history.indexOf(beforeName);
 			if (index >= 0) s.history[index] = afterName;
 			plugin.saveSettings();
+			display();
 		});
 
 		// Description
@@ -67,7 +68,7 @@ function addSnippetSettings(
 		});
 		description.addEventListener("input", (e) => {
 			const target = e.target as HTMLInputElement;
-			s.snippets[i].desc = target.value;
+			o.desc = target.value;
 			plugin.saveSettings();
 		});
 
@@ -77,7 +78,7 @@ function addSnippetSettings(
 		code.setAttr("contenteditable", true);
 		code.innerText = o.code;
 		code.addEventListener("input", () => {
-			s.snippets[i].code = code.innerText;
+			o.code = code.innerText;
 			plugin.saveSettings();
 		});
 
@@ -95,7 +96,7 @@ function addSnippetSettings(
 		// Toggle
 		setting.addToggle((comp) => {
 			comp.setValue(o.check).onChange(async (value) => {
-				s.snippets[i].check = value;
+				o.check = value;
 				await plugin.saveSettings();
 				display();
 			});
