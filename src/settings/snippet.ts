@@ -21,7 +21,7 @@ function addSnippetInfoSetting(
 	});
 	snippets.addEventListener("click", () => {
 		plugin.settings.snippets.push({
-			name: "test",
+			name: "_test",
 			desc: "basic snippet",
 			code: "$pst$ $cursor$ $nl$",
 			check: true,

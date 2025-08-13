@@ -21,7 +21,7 @@ function addCommandInfoSetting(
 	});
 	commands.addEventListener("click", () => {
 		plugin.settings.commands.push({
-			name: "test",
+			name: "_test",
 			desc: "basic snippet",
 			commandId: "",
 			check: true,
