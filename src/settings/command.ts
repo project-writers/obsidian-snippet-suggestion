@@ -23,7 +23,7 @@ function addCommandInfoSetting(
 		plugin.settings.commands.push({
 			id: crypto.randomUUID(),
 			name: "_test",
-			desc: "basic snippet",
+			desc: "basic command",
 			commandId: "",
 			check: true,
 		});

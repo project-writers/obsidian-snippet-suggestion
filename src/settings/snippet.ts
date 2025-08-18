@@ -24,7 +24,7 @@ function addSnippetInfoSetting(
 			id: crypto.randomUUID(),
 			name: "_test",
 			desc: "basic snippet",
-			code: "$pst$ $cursor$ $nl$",
+			code: "$pst$ $cursor$",
 			check: true,
 		});
 		plugin.saveSettings();
