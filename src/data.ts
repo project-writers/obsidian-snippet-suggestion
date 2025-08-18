@@ -21,12 +21,14 @@ export type SettingsData = {
 };
 
 export type CommandValues = {
+	id: string;
 	name: string;
 	commandId: string;
 	desc: string;
 	check: boolean;
 };
 export type SnippetsValues = {
+	id: string;
 	name: string;
 	code: string;
 	desc: string;
@@ -51,48 +53,56 @@ export const DEFAULT_SETTINGS: SettingsData = {
 	commands: [],
 	snippets: [
 		{
+			id: "default-as",
 			name: "as",
 			code: "{$pst$}$cursor$",
 			desc: "arrow-start",
 			check: true,
 		},
 		{
+			id: "default-ae",
 			name: "ae",
 			code: "{$pst$|red|diagonal}$cursor$",
 			desc: "arrow-end",
 			check: true,
 		},
 		{
+			id: "default-day",
 			name: "day",
 			code: "$today$",
 			desc: "today",
 			check: true,
 		},
 		{
+			id: "default-now",
 			name: "now",
 			code: "$now$",
 			desc: "now",
 			check: true,
 		},
 		{
+			id: "default-cn",
 			name: "cn",
 			code: "> [!note] $cursor$\n> \n> $pst$",
 			desc: "callout name",
 			check: true,
 		},
 		{
+			id: "default-cc",
 			name: "cc ",
 			code: "> [!note] name\n> $cursor$\n> $pst$",
 			desc: "callout content",
 			check: true,
 		},
 		{
+			id: "default-cur",
 			name: "cur",
 			code: "inline $cursor$ test",
 			desc: "time",
 			check: true,
 		},
 		{
+			id: "default-pst",
 			name: "pst",
 			code: "hello \n> $cursor$ $pst$",
 			desc: "clipboard",

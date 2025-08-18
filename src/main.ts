@@ -5,7 +5,6 @@ import { SettingsData, DEFAULT_SETTINGS } from "./data";
 
 export default class SnippetsSuggestionPlugin extends Plugin {
 	settings: SettingsData;
-	snippetList: string[];
 
 	async onload() {
 		await this.loadSettings();
@@ -22,34 +21,31 @@ export default class SnippetsSuggestionPlugin extends Plugin {
 			DEFAULT_SETTINGS,
 			await this.loadData(),
 		);
-		this.updateSnippetList();
+
+		let settingsChanged = false;
+		this.settings.snippets.forEach((snippet) => {
+			if (!snippet.id) {
+				snippet.id = crypto.randomUUID();
+				settingsChanged = true;
+			}
+		});
+
+		this.settings.commands.forEach((command) => {
+			if (!command.id) {
+				command.id = crypto.randomUUID();
+				settingsChanged = true;
+			}
+		});
+
+		if (settingsChanged) {
+			await this.saveSettings();
+		}
 	}
 
 	async saveSettings() {
 		// 이게 data.json 에 상태값을 저장하네
 		await this.saveData(this.settings);
 		// 저장하고 업데이트하면 데이터 파일과 동기화가 됐다고 보는 듯
-		this.updateSnippetList();
-	}
-
-	updateSnippetList() {
-		// 히스토리 사용여부
-		if (this.settings.hasHistory) {
-			this.snippetList = [
-				...new Set([
-					...this.settings.history,
-					...[...this.settings.snippets, ...this.settings.commands]
-						.filter((o) => o.check)
-						.map((o) => o.name),
-				]),
-			];
-		} else {
-			this.snippetList = [
-				...[...this.settings.snippets, ...this.settings.commands]
-					.filter((o) => o.check)
-					.map((o) => o.name),
-			];
-		}
 	}
 
 	// 히스토리는 따로 운영해서 검색한거 박아두고 서치리스트에 앞자리에 배치하는 듯

@@ -21,6 +21,7 @@ function addSnippetInfoSetting(
 	});
 	snippets.addEventListener("click", () => {
 		plugin.settings.snippets.push({
+			id: crypto.randomUUID(),
 			name: "_test",
 			desc: "basic snippet",
 			code: "$pst$ $cursor$ $nl$",
@@ -96,7 +97,7 @@ function addSnippetSettings(
 		deleteButton.innerHTML = trash;
 		deleteButton.addClass("custom-snippet-trash");
 		deleteButton.addEventListener("click", () => {
-			s.snippets = s.snippets.filter((o2) => o2.name !== o.name);
+			s.snippets = s.snippets.filter((o2) => o2.id !== o.id);
 			s.history = s.history.filter((name) => name !== o.name);
 			plugin.saveSettings();
 			display();

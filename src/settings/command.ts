@@ -21,6 +21,7 @@ function addCommandInfoSetting(
 	});
 	commands.addEventListener("click", () => {
 		plugin.settings.commands.push({
+			id: crypto.randomUUID(),
 			name: "_test",
 			desc: "basic snippet",
 			commandId: "",
@@ -118,7 +119,7 @@ function addCommandSettings(
 		deleteButton.innerHTML = trash;
 		deleteButton.addClass("custom-snippet-trash");
 		deleteButton.addEventListener("click", () => {
-			s.commands = s.commands.filter((o2) => o2.name !== o.name);
+			s.commands = s.commands.filter((o2) => o2.id !== o.id);
 			s.history = s.history.filter((name) => name !== o.name);
 			plugin.saveSettings();
 			display();

@@ -16,6 +16,9 @@ import * as Hangul from "hangul-js";
 export class Suggester extends EditorSuggest<string> {
 	private currentContext: EditorSuggestContext | null = null;
 	private cliptext: string;
+	private fuseResults: import("fuse.js").FuseResult<
+		SnippetsValues | CommandValues
+	>[] = [];
 	constructor(public plugin: SnippetsSuggestionPlugin) {
 		super(plugin.app);
 	}
@@ -48,20 +51,20 @@ export class Suggester extends EditorSuggest<string> {
 		let query = context.query
 			.replace(this.plugin.settings.trigger, "")
 			.toLowerCase();
-		if (query.length === 0) return this.plugin.snippetList;
+		if (query.length === 0) {
+			this.fuseResults = [];
+			return [
+				...this.plugin.settings.snippets,
+				...this.plugin.settings.commands,
+			]
+				.filter((o) => o.check)
+				.map((o) => o.id);
+		}
 		// 한글변환
 		query = this.hangul2roman(query);
 
-		// 퍼지파인딩
-		// const options = {
-		// 	keys: ["name"], // 검색할 키
-		// 	threshold: 0.4, // 얼마나 퍼지 매칭을 허용할지
-		// };
-		// const fuse = new Fuse(
-		// 	this.plugin.snippetList.map((snippet) => ({ name: snippet })),
-		// 	options,
-		// );
 		const options = {
+			includeMatches: true,
 			keys: [
 				"name", // 스니펫 이름 검색
 				"desc", // 스니펫 설명 검색
@@ -77,32 +80,52 @@ export class Suggester extends EditorSuggest<string> {
 			options,
 		);
 		const results = fuse.search(query.replace(/`/g, ""));
-		return results.map((result) => result.item.name);
+		this.fuseResults = results;
+		return results.map((result) => result.item.id);
 	}
-	highlightQuery(text: string, query: string): string {
-		const regex = new RegExp(`(${query})`, "gi");
-		return text.replace(regex, '<span class="highlight">$1</span>');
+	highlight(text: string, indices: readonly [number, number][]) {
+		let result = "";
+		let lastIndex = 0;
+		for (const [start, end] of indices) {
+			result += text.substring(lastIndex, start);
+			result += `<span class="highlight">${text.substring(
+				start,
+				end + 1,
+			)}</span>`;
+			lastIndex = end + 1;
+		}
+		result += text.substring(lastIndex);
+		return result;
 	}
-	async renderSuggestion(suggestion: string, el: HTMLElement) {
+	async renderSuggestion(suggestionId: string, el: HTMLElement) {
 		const s = this.plugin.settings;
 		const symbols = this.plugin.settings.symbols;
 		const outer = el.createDiv({ cls: "SS-suggester-container" });
-		let query =
-			this.currentContext?.query
-				.replace(/`/g, "")
-				.replace(s.trigger, "")
-				.toLowerCase() ?? "";
-
-		// 한글 변환
-		query = this.hangul2roman(query);
-		const highlightedSuggestion = this.highlightQuery(suggestion, query);
-		outer.createDiv({ cls: "SS-shortcode" }).innerHTML =
-			highlightedSuggestion;
 
 		const shortcodes = [...s.snippets, ...s.commands];
-		const suggestObj = shortcodes.find((o) => o.name === suggestion);
+		const suggestObj = shortcodes.find((o) => o.id === suggestionId);
 
 		if (!suggestObj) return;
+
+		const result = this.fuseResults.find(
+			(result) => result.item.id === suggestionId,
+		);
+		const nameMatch = result?.matches?.find(
+			(m: import("fuse.js").FuseResultMatch) => m.key === "name",
+		);
+		const descMatch = result?.matches?.find(
+			(m: import("fuse.js").FuseResultMatch) => m.key === "desc",
+		);
+
+		const highlightedName = nameMatch
+			? this.highlight(suggestObj.name, nameMatch.indices)
+			: suggestObj.name;
+		const highlightedDesc = descMatch
+			? this.highlight(suggestObj.desc, descMatch.indices)
+			: suggestObj.desc;
+
+		outer.createDiv({ cls: "SS-shortcode" }).innerHTML = highlightedName;
+
 		if (this.isSnippetsValues(suggestObj)) {
 			const cliptext = await this.readClipboardText();
 			let code = suggestObj.code
@@ -127,21 +150,23 @@ export class Suggester extends EditorSuggest<string> {
 			code = code.replace(
 				symbols.pasteSymbol,
 				this.plugin.settings.hasCliptextLineNumber
-					? `<span class="SS-clip">${text}(${cliptext.split("\n").length})</span>`
+					? `<span class="SS-clip">${text}(${
+							cliptext.split("\n").length
+					  })</span>`
 					: `<span class="SS-clip">${text}</span>`,
 			);
 
-			outer.createDiv({ cls: "SS-desc" }).setText(suggestObj.desc);
+			outer.createDiv({ cls: "SS-desc" }).innerHTML = highlightedDesc;
 			outer.createDiv({ cls: "SS-code" }).innerHTML = code;
 		} else {
-			outer.createDiv({ cls: "SS-desc" }).setText(suggestObj.desc);
+			outer.createDiv({ cls: "SS-desc" }).innerHTML = highlightedDesc;
 			outer.createDiv({ cls: "SS-code SS-command" }).innerHTML =
 				suggestObj.commandId;
 		}
 	}
 
 	// 여기서 snippets 적용
-	selectSuggestion(suggestion: string): void {
+	selectSuggestion(suggestionId: string): void {
 		const s = this.plugin.settings;
 		const symbols = s.symbols;
 		const queryLength = this.context?.query.length;
@@ -154,7 +179,7 @@ export class Suggester extends EditorSuggest<string> {
 			...s.snippets,
 			...s.commands,
 		];
-		const suggestObj = shortcodes.filter((o) => o.name === suggestion)[0];
+		const suggestObj = shortcodes.find((o) => o.id === suggestionId);
 		if (suggestObj && this.context) {
 			if (this.isSnippetsValues(suggestObj)) {
 				// 여긴 스니펫 작동
@@ -201,7 +226,7 @@ export class Suggester extends EditorSuggest<string> {
 							(endPosition.nlinesCount === 0 ? queryLength : 0),
 					};
 					editor.setCursor(position);
-					this.plugin.updateHistory(suggestion);
+					this.plugin.updateHistory(suggestObj.name);
 				});
 			} else {
 				const commandId = suggestObj.commandId;
