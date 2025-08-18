@@ -48,18 +48,32 @@ export class Suggester extends EditorSuggest<string> {
 		let query = context.query
 			.replace(this.plugin.settings.trigger, "")
 			.toLowerCase();
-		if (query.length === 0)
-			return this.plugin.snippetList.filter((p) => p.includes(query));
+		if (query.length === 0) return this.plugin.snippetList;
 		// 한글변환
 		query = this.hangul2roman(query);
 
 		// 퍼지파인딩
+		// const options = {
+		// 	keys: ["name"], // 검색할 키
+		// 	threshold: 0.4, // 얼마나 퍼지 매칭을 허용할지
+		// };
+		// const fuse = new Fuse(
+		// 	this.plugin.snippetList.map((snippet) => ({ name: snippet })),
+		// 	options,
+		// );
 		const options = {
-			keys: ["name"], // 검색할 키
-			threshold: 0.4, // 얼마나 퍼지 매칭을 허용할지
+			keys: [
+				"name", // 스니펫 이름 검색
+				"desc", // 스니펫 설명 검색
+			],
+			threshold: 0.4,
 		};
+
 		const fuse = new Fuse(
-			this.plugin.snippetList.map((snippet) => ({ name: snippet })),
+			[
+				...this.plugin.settings.snippets,
+				...this.plugin.settings.commands,
+			],
 			options,
 		);
 		const results = fuse.search(query.replace(/`/g, ""));
