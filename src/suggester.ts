@@ -53,12 +53,34 @@ export class Suggester extends EditorSuggest<string> {
 			.toLowerCase();
 		if (query.length === 0) {
 			this.fuseResults = [];
-			return [
+
+			// 사용 가능한 모든 스니펫과 커맨드 목록을 가져옵니다.
+			const allItems = [
 				...this.plugin.settings.snippets,
 				...this.plugin.settings.commands,
-			]
-				.filter((o) => o.check)
-				.map((o) => o.id);
+			].filter((o) => o.check);
+
+			// 히스토리에서 가장 최근 항목의 이름을 가져옵니다.
+			const lastUsedName = this.plugin.settings.history[0];
+
+			if (lastUsedName) {
+				// 최근 사용 항목을 찾습니다.
+				const lastUsedItem = allItems.find(
+					(item) => item.name === lastUsedName,
+				);
+
+				if (lastUsedItem) {
+					// 나머지 항목들에서 최근 사용 항목을 제외합니다.
+					const otherItems = allItems.filter(
+						(item) => item.name !== lastUsedName,
+					);
+					// [최근 항목, 나머지 항목] 순서로 새로운 목록을 만듭니다.
+					return [lastUsedItem, ...otherItems].map((item) => item.id);
+				}
+			}
+
+			// 히스토리가 없으면 그냥 원래 목록을 반환합니다.
+			return allItems.map((o) => o.id);
 		}
 		// 한글변환
 		query = this.hangul2roman(query);
@@ -152,7 +174,7 @@ export class Suggester extends EditorSuggest<string> {
 				this.plugin.settings.hasCliptextLineNumber
 					? `<span class="SS-clip">${text}(${
 							cliptext.split("\n").length
-					  })</span>`
+						})</span>`
 					: `<span class="SS-clip">${text}</span>`,
 			);
 
